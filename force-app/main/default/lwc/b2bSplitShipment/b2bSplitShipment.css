@@ -1,0 +1,557 @@
+/* No outer card/border — sit on the page as plain white space, and
+   inherit the storefront/checkout font + a comfortable base size. */
+.split-ship {
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: inherit;
+}
+
+/* ---- Header ---- */
+.ss-header {
+    margin-bottom: 1rem;
+}
+.ss-header-text {
+    max-width: 46rem;
+}
+.ss-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+.ss-subtitle {
+    font-size: 0.95rem;
+    margin-top: 0.15rem;
+}
+.ss-header-actions {
+    flex: 0 0 auto;
+    margin-left: 1rem;
+    /* Drop the buttons down so they sit centered against the gray subtitle line
+       (which is below the title), rather than top-aligned with the title. */
+    margin-top: 1.4rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.ss-info {
+    font-size: 0.95rem;
+}
+
+/* Small, non-blocking "totals are recalculating" status for the managed Cart Summary panel. */
+.ss-summary-syncing {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #706e6b;
+}
+.ss-summary-syncing-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #2e844a;
+    animation: ss-pulse 1s ease-in-out infinite;
+}
+@keyframes ss-pulse {
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+/* Placeholder callout for the not-yet-built Bulk Edit / Phased Delivery features. */
+.ss-info-heading {
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+.ss-info-body {
+    /* Preserve the newlines/bullets in the build-notes string. */
+    white-space: pre-line;
+}
+
+/* ---- Buttons ---- */
+/* Primary action matching the checkout's "Continue to Shipping Method": green fill, white text. */
+.ss-enable-btn {
+    background-color: #2e844a;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.ss-enable-btn:hover,
+.ss-enable-btn:focus {
+    background-color: #256b3d;
+}
+
+.ss-btn-secondary {
+    background-color: #ffffff;
+    color: #2e844a;
+    border: 1px solid #2e844a;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.ss-btn-secondary:hover {
+    background-color: #f3faf5;
+}
+
+.ss-btn-small {
+    background-color: #2e844a;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.ss-btn-small:hover {
+    background-color: #256b3d;
+}
+.ss-btn-small:disabled {
+    background-color: #c9c9c9;
+    cursor: not-allowed;
+}
+
+.ss-link {
+    background: none;
+    border: none;
+    color: #0176d3;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.95rem;
+}
+.ss-link:hover {
+    text-decoration: underline;
+}
+
+.ss-confirm-bar {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ---- Shipment card ---- */
+.ss-shipment {
+    border: 1px solid #e5e5e5;
+    border-left: 3px solid #2e844a;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: opacity 0.15s ease-in-out;
+}
+/* Grayed while a background update for this shipment is in flight. */
+.ss-pending {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* Header sits flush left with a package icon; the body is indented so the
+   shipment label reads as the parent of everything under it. */
+.ss-shipment-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.ss-shipment-icon {
+    --slds-c-icon-color-foreground-default: #2e844a;
+    flex: 0 0 auto;
+    /* Nudge onto the same optical center line as the heading text. */
+    display: inline-flex;
+    align-items: center;
+}
+.ss-shipment-name {
+    flex: 1 1 auto;
+    font-weight: 700;
+    line-height: 1; /* tighten so the glyph centers against the icon */
+    margin: 0;
+}
+.ss-shipment-body {
+    padding-left: 1.75rem;
+}
+
+/* ---- Icon buttons (native, so we fully control the hover box) ---- */
+.ss-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    padding: 0.15rem;
+    cursor: pointer;
+    line-height: 0;
+    color: #706e6b;
+}
+/* No box at rest; a subtle box appears on hover/focus. */
+.ss-icon-btn:hover,
+.ss-icon-btn:focus {
+    border-color: #c9c9c9;
+    background-color: #f3f3f3;
+}
+/* Trash + its (hover-revealed) hint, pushed to the right edge of the shipment header. */
+.ss-delete-wrap {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.ss-shipment-delete {
+    flex: 0 0 auto;
+    --slds-c-icon-color-foreground-default: #706e6b;
+}
+.ss-shipment-delete:hover:not(:disabled) {
+    --slds-c-icon-color-foreground-default: #ba0517; /* destructive hint on hover */
+}
+/* Trash is disabled until the shipment is empty (its items must be moved/removed first). */
+.ss-shipment-delete:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+.ss-shipment-delete:disabled:hover,
+.ss-shipment-delete:disabled:focus {
+    border-color: transparent;
+    background-color: transparent;
+}
+/* Niche guidance — hidden until the buyer hovers/focuses the (disabled) trash, not shown all the
+   time. display:none keeps it out of the layout so it doesn't reserve space when hidden. */
+.ss-delete-hint {
+    display: none;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: #706e6b;
+    white-space: nowrap;
+}
+.ss-delete-wrap:hover .ss-delete-hint,
+.ss-delete-wrap:focus-within .ss-delete-hint {
+    display: inline;
+}
+.ss-address-edit {
+    --slds-c-icon-color-foreground-default: #706e6b;
+}
+.ss-line-delete {
+    flex: 0 0 auto;
+    margin-left: 0.25rem;
+    --slds-c-icon-color-foreground-default: #b0adab; /* fainter than the shipment trash */
+}
+.ss-line-delete:hover {
+    --slds-c-icon-color-foreground-default: #ba0517;
+}
+
+/* ---- Native form controls, styled to match the SLDS combobox/input ----
+   Native elements keep us out of shadow-DOM alignment fights; this restyle
+   recovers the SLDS look (border, radius, chevron, focus glow, hover). The one
+   thing native can't restyle is the OPEN dropdown list — that's browser-drawn. */
+.ss-native-select,
+.ss-native-date {
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #181818;
+    border: 1px solid #c9c9c9;
+    border-radius: 0.25rem;
+    padding: 0.35rem 0.75rem;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    height: 2.25rem;
+    line-height: 1.4;
+    transition: border-color 0.1s linear, box-shadow 0.1s linear;
+}
+.ss-native-select {
+    width: 100%;
+    /* drop the OS arrow and paint the SLDS down-chevron on the right */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%3E%3Cpath%20fill='none'%20stroke='%235c5c5c'%20stroke-width='1.5'%20d='M4%206l4%204%204-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 0.85rem;
+}
+.ss-native-date {
+    width: 11rem;
+}
+/* SLDS hover: border darkens slightly */
+.ss-native-select:hover,
+.ss-native-date:hover {
+    border-color: #747474;
+}
+/* SLDS focus: blue border + soft blue glow */
+.ss-native-select:focus,
+.ss-native-date:focus {
+    outline: none;
+    border-color: #1b96ff;
+    box-shadow: 0 0 3px #0176d3;
+}
+.ss-field-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #444;
+    margin-bottom: 0.25rem;
+}
+.ss-field-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: #706e6b;
+    margin-top: 0.2rem;
+}
+
+/* ---- Skeleton placeholder while a new shipment is created ---- */
+.ss-skeleton {
+    border-left: 3px solid #c9c9c9;
+}
+.ss-skel-line {
+    height: 0.85rem;
+    border-radius: 0.25rem;
+    background: linear-gradient(90deg, #eeeeee 25%, #f6f6f6 37%, #eeeeee 63%);
+    background-size: 400% 100%;
+    animation: ss-shimmer 1.2s ease-in-out infinite;
+    margin: 0.6rem 0;
+}
+.ss-skel-head {
+    width: 40%;
+    height: 1.1rem;
+}
+.ss-skel-short {
+    width: 60%;
+}
+@keyframes ss-shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+/* ---- Address row: pencil directly left of the address ---- */
+.ss-address-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    /* Match the height of the edit state (2.25rem native select) so switching
+       between the confirmed address and the address picker doesn't reflow the
+       card below it. */
+    min-height: 2.25rem;
+}
+.ss-address-text {
+    font-size: 1rem;
+}
+
+/* ---- Item line ---- */
+.ss-thumb {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.ss-item {
+    padding: 0.5rem 0;
+}
+
+/* image | name+unit | qty stepper | split | line total | move-to
+   everything vertically centered on one plane */
+.ss-item-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.ss-item-name {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.ss-name-text {
+    font-size: 1rem;
+}
+.ss-unit {
+    font-size: 0.9rem;
+}
+
+.ss-qty {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 0 0 auto;
+}
+.ss-qty-value {
+    min-width: 1.5rem;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.ss-split-link {
+    flex: 0 0 auto;
+}
+
+.ss-line-total {
+    flex: 0 0 auto;
+    min-width: 5rem;
+    text-align: right;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.ss-item-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    width: 170px;
+    justify-content: flex-end;
+}
+
+.ss-empty {
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
+}
+
+/* ---- Method + date: one line, inline labels centered against their controls ----
+   Labels are our own spans (not the Lightning components' internal labels, which live in
+   shadow DOM and reserve a ~33% column we can't restyle), so the components run label-hidden
+   and we own the horizontal layout. align-items:center centers each label with its box; the
+   row is nowrap so method + date + ASAP always stay on a single line. */
+.ss-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: nowrap;
+}
+.ss-field-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+.ss-field-label-inline {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #444;
+    white-space: nowrap;
+}
+.ss-optional {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: #706e6b;
+}
+.ss-date-clear {
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Inline address dropdown (pencil) + add-shipment picker */
+.ss-address-inline {
+    width: auto;
+    min-width: 16rem;
+}
+.ss-address-select {
+    width: 100%;
+    max-width: 28rem;
+}
+.ss-form-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+
+.ss-split {
+    background-color: #fafafa;
+}
+
+/* Split panel: small fixed-width qty, target combobox takes the rest */
+.ss-split-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+.ss-split-qty {
+    /* Wide enough that the "Quantity to split" label stays on one line. */
+    flex: 0 0 10rem;
+    max-width: 10rem;
+}
+.ss-split-target {
+    flex: 1 1 18rem;
+    min-width: 14rem;
+}
+
+/* Editable quantity box between the +/- steppers */
+.ss-qty-input {
+    width: 3.5rem;
+    height: 2rem;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #181818;
+    border: 1px solid #c9c9c9;
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.ss-qty-input::-webkit-outer-spin-button,
+.ss-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.ss-qty-input:focus {
+    outline: none;
+    border-color: #1b96ff;
+    box-shadow: 0 0 3px #0176d3;
+}
+
+/* Native controls on the method/date row: fixed 2.25rem height (from .ss-native-select /
+   .ss-native-date) with no reserved label/hint space, so align-items:center on .ss-field-inline
+   centers each control against its label span, and the native date's OS picker floats without
+   reflowing the row. The method dropdown is a touch wider so method names aren't truncated. */
+.ss-combo {
+    width: 18rem;
+}
+
+/* Undo bar for a removed line */
+.ss-undo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #f3f3f3;
+}
+.ss-undo-text {
+    flex: 1 1 auto;
+}
+.ss-undo-action {
+    font-weight: 700;
+}
+.ss-undo-dismiss {
+    color: #706e6b;
+}
+/* While the delete is still recalculating: gray the box and show the Undo button as
+   unavailable so the buyer waits until the shipment has settled before undoing. */
+.ss-undo-pending {
+    opacity: 0.7;
+}
+.ss-undo-progress {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #706e6b;
+    white-space: nowrap;
+}
+.ss-undo-action:disabled {
+    color: #b0adab;
+    font-weight: 700;
+    cursor: progress;
+    text-decoration: none;
+}
+
+/* New-shipment box: echo a real shipment card (green left bar) but dashed +
+   faintly tinted to signal it still needs the buyer to confirm an address. */
+.ss-address-form {
+    border-left: 3px dashed #2e844a;
+    background-color: #fbfdfb;
+}

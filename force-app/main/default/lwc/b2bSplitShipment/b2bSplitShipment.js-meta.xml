@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>B2B Split Shipment</masterLabel>
+    <description>Custom split-shipment checkout screen: shipment-as-parent, per-shipment address / method / requested date, item move + quantity split.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="cartId" type="String" label="Cart ID" default="{!cartId}" description="The active cart record ID. On a checkout page bind {!cartId}; otherwise leave blank and the buyer's in-progress cart is resolved automatically."/>
+            <property name="checkoutUrl" type="String" label="Checkout URL" default="https://YOUR_MYDOMAIN.my.site.com/YOUR_STORE_PATH/checkout" description="Where the 'Confirm and return to checkout' button navigates."/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

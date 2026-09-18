@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>Split Shipment Sync</masterLabel>
+    <isExposed>true</isExposed>
+    <description>Broadcast when split-shipment delivery groups change, so the overview component can refresh.</description>
+    <lightningMessageFields>
+        <fieldName>source</fieldName>
+        <description>Identifier of the component that published the change.</description>
+    </lightningMessageFields>
+</LightningMessageChannel>

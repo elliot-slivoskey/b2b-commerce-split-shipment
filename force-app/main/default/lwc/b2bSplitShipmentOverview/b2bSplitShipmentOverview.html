@@ -1,0 +1,32 @@
+<template>
+    <div class="ss-ov slds-p-around_medium">
+        <template if:true={loading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+
+        <template if:false={loading}>
+            <h3 class="ss-ov-title">{cardTitle}</h3>
+
+            <template if:true={error}>
+                <div class="slds-text-color_error slds-m-top_x-small">{error}</div>
+            </template>
+
+            <template if:true={hasShipments}>
+                <template for:each={shipments} for:item="s">
+                    <div key={s.id} class="ss-ov-row">
+                        <div class="ss-ov-head">
+                            <span class="ss-ov-name">{s.name}</span>
+                            <span class="ss-ov-sub">{s.subtotal}</span>
+                        </div>
+                        <div class="ss-ov-meta">{s.itemCount} item(s)</div>
+                        <div class="ss-ov-meta">{s.addressLabel}</div>
+                        <div class="ss-ov-meta ss-ov-method">{s.methodLabel}</div>
+                    </div>
+                </template>
+            </template>
+            <template if:false={hasShipments}>
+                <p class="ss-ov-meta">No shipments yet.</p>
+            </template>
+        </template>
+    </div>
+</template>

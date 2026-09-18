@@ -1,0 +1,20 @@
+# Salesforce DX
+.sf/
+.sfdx/
+.localdevserver/
+deploy-options.json
+
+# Logs / temp
+*.log
+*.tmp
+
+# Node / tooling
+node_modules/
+.eslintcache
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

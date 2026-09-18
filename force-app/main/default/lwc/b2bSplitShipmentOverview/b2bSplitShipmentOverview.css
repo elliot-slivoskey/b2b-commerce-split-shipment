@@ -1,0 +1,39 @@
+.ss-ov {
+    font-family: inherit;
+    color: inherit;
+}
+.ss-ov-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+.ss-ov-row {
+    padding: 0.6rem 0;
+    border-top: 1px solid #e5e5e5;
+}
+.ss-ov-row:first-of-type {
+    border-top: none;
+}
+.ss-ov-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+.ss-ov-name {
+    font-weight: 600;
+    font-size: 1rem;
+}
+.ss-ov-sub {
+    font-weight: 600;
+    font-size: 1rem;
+}
+.ss-ov-meta {
+    font-size: 0.9rem;
+    color: #706e6b;
+    margin-top: 0.1rem;
+    word-break: break-word;
+}
+.ss-ov-method {
+    color: #706e6b;
+}

@@ -1,0 +1,379 @@
+<template>
+    <div class="split-ship slds-p-around_medium">
+        <template if:true={loading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+
+        <template if:false={loading}>
+            <!-- Header -->
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start ss-header">
+                <div class="ss-header-text">
+                    <h2 class="ss-title">{headerTitle}</h2>
+                    <p class="slds-text-color_weak ss-subtitle">{headerDescription}</p>
+                </div>
+                <div class="ss-header-actions">
+                    <lightning-button
+                        label="Bulk Edit"
+                        icon-name="utility:table"
+                        variant="neutral"
+                        onclick={handleBulkEdit}
+                    ></lightning-button>
+                    <lightning-button
+                        label="Phased Delivery"
+                        icon-name="utility:event"
+                        variant="neutral"
+                        onclick={handlePhasedDelivery}
+                    ></lightning-button>
+                </div>
+            </div>
+
+            <!-- Non-blocking notice that the managed Cart Summary totals are recalculating after an
+                 edit. The panel is a separate managed component we can't put a spinner inside, so we
+                 surface the "in progress" state here; totals refresh once our change settles. -->
+            <template if:true={summarySyncing}>
+                <div class="ss-summary-syncing slds-m-bottom_small" role="status" aria-live="polite">
+                    <span class="ss-summary-syncing-dot" aria-hidden="true"></span>
+                    <span>Updating order totals…</span>
+                </div>
+            </template>
+
+            <template if:true={info}>
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_small ss-info" role="status">
+                    <p class="ss-info-heading">Not yet available</p>
+                    <p class="ss-info-body">{info}</p>
+                </div>
+            </template>
+            <template if:true={error}>
+                <div class="slds-box slds-theme_error slds-m-bottom_small" role="alert">{error}</div>
+            </template>
+            <template if:true={undoItem}>
+                <div class={undoBoxClass} role="status">
+                    <span class="ss-undo-text">{undoLabel}</span>
+                    <template if:true={undoPending}>
+                        <span class="ss-undo-progress">Updating…</span>
+                    </template>
+                    <button class="ss-link ss-undo-action" onclick={handleUndoDelete} disabled={undoPending}>Undo</button>
+                    <button class="ss-link ss-undo-dismiss" onclick={handleDismissUndo}>Dismiss</button>
+                </div>
+            </template>
+
+            <!-- Shipments -->
+            <template for:each={viewShipments} for:item="s">
+                <div key={s.id} class={s.pendingClass}>
+                    <!-- Shipment header sits flush left; body is indented so the label stands out -->
+                    <div class="ss-shipment-head slds-m-bottom_small">
+                        <lightning-icon
+                            icon-name="utility:package"
+                            size="x-small"
+                            alternative-text="Shipment"
+                            class="ss-shipment-icon"
+                        ></lightning-icon>
+                        <h3 class="slds-text-heading_small ss-shipment-name">{s.name}</h3>
+                        <template if:true={s.showDelete}>
+                            <span class="ss-delete-wrap">
+                                <template if:true={s.deleteDisabled}>
+                                    <span class="ss-delete-hint">Move or remove all items to delete this shipment</span>
+                                </template>
+                                <button
+                                    type="button"
+                                    class="ss-icon-btn ss-shipment-delete"
+                                    title={s.deleteTitle}
+                                    aria-label={s.deleteTitle}
+                                    data-id={s.id}
+                                    disabled={s.deleteDisabled}
+                                    onclick={handleDeleteShipment}
+                                >
+                                    <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+
+                  <div class="ss-shipment-body">
+                    <!-- Address: text + pencil; pencil swaps in an inline address dropdown -->
+                    <div class="ss-address-row slds-m-bottom_small">
+                        <template if:false={s.editingAddress}>
+                            <span class="ss-address-text">{s.addressLabel}</span>
+                            <button
+                                type="button"
+                                class="ss-icon-btn ss-address-edit"
+                                title="Change address"
+                                aria-label="Change address"
+                                data-id={s.id}
+                                onclick={handleEditAddressInline}
+                            >
+                                <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                            </button>
+                        </template>
+                        <template if:true={s.editingAddress}>
+                            <select
+                                class="ss-native-select ss-address-inline"
+                                aria-label="Change address"
+                                data-id={s.id}
+                                onchange={handleInlineAddressPick}
+                            >
+                                <option value="">Select an address…</option>
+                                <template for:each={addressBookOptions} for:item="o">
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                </template>
+                            </select>
+                            <button
+                                type="button"
+                                class="ss-icon-btn"
+                                title="Cancel"
+                                aria-label="Cancel"
+                                onclick={handleCancelInlineEdit}
+                            >
+                                <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Per-shipment delivery method + requested date (inline labels; hidden until the shipment has items) -->
+                    <template if:false={s.isEmpty}>
+                        <div class="ss-meta-row slds-m-bottom_small">
+                            <div class="ss-field-inline">
+                                <span class="ss-field-label-inline">Delivery method</span>
+                                <template if:true={s.hasMethods}>
+                                    <select
+                                        class="ss-native-select ss-combo"
+                                        aria-label="Delivery method"
+                                        data-id={s.id}
+                                        onchange={handleMethodChange}
+                                    >
+                                        <template for:each={s.methodOptions} for:item="m">
+                                            <option key={m.value} value={m.value} selected={m.selected}>{m.label}</option>
+                                        </template>
+                                    </select>
+                                </template>
+                                <template if:false={s.hasMethods}>
+                                    <template if:true={s.methodsLoading}>
+                                        <span class="ss-field-hint">Loading delivery options…</span>
+                                    </template>
+                                    <template if:false={s.methodsLoading}>
+                                        <span class="ss-field-hint">Available once the address is set.</span>
+                                    </template>
+                                </template>
+                            </div>
+                            <div class="ss-field-inline">
+                                <span class="ss-field-label-inline">Requested delivery date <span class="ss-optional">(optional)</span></span>
+                                <input
+                                    type="date"
+                                    class="ss-native-date"
+                                    aria-label="Requested delivery date"
+                                    value={s.desiredDeliveryDate}
+                                    data-id={s.id}
+                                    onchange={handleDateChange}
+                                />
+                                <template if:true={s.hasDate}>
+                                    <button
+                                        type="button"
+                                        class="ss-link ss-date-clear"
+                                        title="Clear the requested date so this ships as soon as possible"
+                                        data-id={s.id}
+                                        onclick={handleClearDate}
+                                    >Clear date</button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Items -->
+                    <ul class="slds-has-dividers_bottom-space">
+                        <template for:each={s.items} for:item="it">
+                            <li key={it.id} class="slds-item ss-item">
+                                <div class="ss-item-row">
+                                    <template if:true={it.image}>
+                                        <img src={it.image} alt={it.name} class="ss-thumb" />
+                                    </template>
+                                    <div class="ss-item-name">
+                                        <div class="ss-name-text">{it.name}</div>
+                                        <div class="slds-text-color_weak ss-unit">{it.unitAmount} each</div>
+                                    </div>
+
+                                    <div class="ss-qty">
+                                        <lightning-button-icon
+                                            icon-name="utility:dash"
+                                            variant="border-filled"
+                                            alternative-text="Decrease quantity"
+                                            title="Decrease quantity"
+                                            data-item={it.id}
+                                            data-group={s.id}
+                                            disabled={it.atMinQty}
+                                            onclick={handleDecrement}
+                                        ></lightning-button-icon>
+                                        <input
+                                            type="number"
+                                            class="ss-qty-input"
+                                            min="1"
+                                            value={it.quantity}
+                                            data-item={it.id}
+                                            data-group={s.id}
+                                            aria-label="Quantity"
+                                            onchange={handleQtyInput}
+                                        />
+                                        <lightning-button-icon
+                                            icon-name="utility:add"
+                                            variant="border-filled"
+                                            alternative-text="Increase quantity"
+                                            title="Increase quantity"
+                                            data-item={it.id}
+                                            data-group={s.id}
+                                            onclick={handleIncrement}
+                                        ></lightning-button-icon>
+                                    </div>
+
+                                    <template if:true={it.canSplitAttempt}>
+                                        <button
+                                            class="ss-link ss-split-link"
+                                            data-item={it.id}
+                                            data-group={s.id}
+                                            onclick={handleStartSplit}
+                                        >Split</button>
+                                    </template>
+
+                                    <div class="ss-line-total">{it.amount}</div>
+
+                                    <div class="ss-item-actions">
+                                        <template if:true={s.canMove}>
+                                            <select
+                                                class="ss-native-select"
+                                                aria-label="Move to shipment"
+                                                data-item={it.id}
+                                                data-group={s.id}
+                                                onchange={handleMoveItem}
+                                            >
+                                                <option value="">Move to…</option>
+                                                <template for:each={it.moveOptions} for:item="o">
+                                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                                </template>
+                                            </select>
+                                        </template>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="ss-icon-btn ss-line-delete"
+                                        title="Remove this item from the order"
+                                        aria-label="Remove this item from the order"
+                                        data-item={it.id}
+                                        data-group={s.id}
+                                        onclick={handleDeleteItem}
+                                    >
+                                        <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                    </button>
+                                </div>
+
+                                <!-- Split panel -->
+                                <template if:true={it.isSplitting}>
+                                    <div class="slds-box slds-box_x-small slds-m-top_x-small ss-split">
+                                        <template if:true={it.splitError}>
+                                            <div class="slds-text-color_error slds-m-bottom_x-small">
+                                                {it.splitError}
+                                            </div>
+                                        </template>
+                                        <template if:true={it.canSplit}>
+                                            <div class="ss-split-row">
+                                                <div class="ss-split-qty">
+                                                    <lightning-input
+                                                        type="number"
+                                                        label="Quantity to split"
+                                                        min="1"
+                                                        max={it.splitMax}
+                                                        value={splitQty}
+                                                        onchange={handleSplitQtyChange}
+                                                    ></lightning-input>
+                                                </div>
+                                                <div class="ss-split-target">
+                                                    <lightning-combobox
+                                                        label="Move to shipment"
+                                                        placeholder="Choose a shipment…"
+                                                        options={it.splitTargetOptions}
+                                                        onchange={handleSplitTargetChange}
+                                                    ></lightning-combobox>
+                                                </div>
+                                            </div>
+                                            <div class="slds-m-top_x-small">
+                                                <button class="ss-btn-small" data-group={s.id} onclick={handleApplySplit}>Move items</button>
+                                                <button class="ss-link slds-m-left_small" onclick={handleCancelSplit}>Cancel</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </li>
+                        </template>
+                        <template if:true={s.isEmpty}>
+                            <li class="slds-item ss-empty">
+                                <span class="slds-text-color_weak">Shipment ready — move items here from another shipment to fill it.</span>
+                            </li>
+                        </template>
+                    </ul>
+                  </div>
+                </div>
+            </template>
+
+            <!-- Skeleton placeholder while a new shipment is being created -->
+            <template if:true={creating}>
+                <div class="ss-shipment ss-skeleton" aria-hidden="true">
+                    <div class="ss-skel-line ss-skel-head"></div>
+                    <div class="ss-skel-line"></div>
+                    <div class="ss-skel-line ss-skel-short"></div>
+                </div>
+            </template>
+
+            <!-- Add shipment (hidden while the new-shipment address form is open) -->
+            <template if:false={showAddressForm}>
+                <button class="ss-btn-secondary" onclick={handleAddShipment}>+ Add shipment</button>
+            </template>
+
+            <!-- Address picker: pick a saved address to confirm the new shipment, or enter a new one -->
+            <template if:true={showAddressForm}>
+                <section class="slds-box slds-m-top_medium ss-address-form">
+                    <h4 class="ss-form-title">{addressFormTitle}</h4>
+
+                    <template if:false={showManualFields}>
+                        <select
+                            class="ss-native-select ss-address-select"
+                            aria-label={addressFormTitle}
+                            onchange={handlePickBookAddress}
+                        >
+                            <option value="">Select an address…</option>
+                            <template for:each={addressBookOptions} for:item="o">
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            </template>
+                        </select>
+                        <div class="slds-m-top_small">
+                            <button class="ss-link" onclick={handleCancelAddress}>Cancel</button>
+                        </div>
+                    </template>
+
+                    <template if:true={showManualFields}>
+                        <lightning-input label="Name / label" name="name" value={form.name} onchange={handleFormChange}></lightning-input>
+                        <lightning-input label="Street" name="street" value={form.street} onchange={handleFormChange}></lightning-input>
+                        <div class="slds-grid slds-gutters_x-small">
+                            <lightning-input class="slds-col" label="City" name="city" value={form.city} onchange={handleFormChange}></lightning-input>
+                            <lightning-input class="slds-col" label="State/Region" name="region" value={form.region} onchange={handleFormChange}></lightning-input>
+                        </div>
+                        <div class="slds-grid slds-gutters_x-small">
+                            <lightning-input class="slds-col" label="Postal code" name="postalCode" value={form.postalCode} onchange={handleFormChange}></lightning-input>
+                            <lightning-input class="slds-col" label="Country" name="country" value={form.country} onchange={handleFormChange}></lightning-input>
+                        </div>
+                        <div class="slds-m-top_small">
+                            <button class="ss-btn-small" disabled={disableSave} onclick={handleSaveAddress}>{saveButtonLabel}</button>
+                            <button class="ss-link slds-m-left_small" onclick={handleCancelAddress}>Cancel</button>
+                        </div>
+                    </template>
+                </section>
+            </template>
+
+            <!-- Confirm -->
+            <div class="ss-confirm-bar slds-m-top_large">
+                <button class="ss-enable-btn" onclick={handleConfirm}>Confirm &amp; return to checkout</button>
+            </div>
+
+            <template if:true={busy}>
+                <lightning-spinner alternative-text="Working" size="small"></lightning-spinner>
+            </template>
+        </template>
+    </div>
+</template>
