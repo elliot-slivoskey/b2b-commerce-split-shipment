@@ -27,7 +27,7 @@ more instances of iterations than I expected for such a simple feature.
 These are written up in detail below and aren't in Salesforce's documentation.
 
 ## Video Preview
-<img width="1154" height="719" alt="Kapture 2026-09-18 at 15 46 39" src="https://github.com/user-attachments/assets/4440dbf4-4925-401d-b964-2f3185331179" />
+<img width="1154" height="719" alt="Kapture 2026-09-18 at 15 46 39" src="https://github.com/user-attachments/assets/8acb0799-fdc3-417d-ac4c-a887ba02007f" />
 
 ---
 
